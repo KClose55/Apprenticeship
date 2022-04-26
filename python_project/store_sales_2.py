@@ -1,5 +1,4 @@
 #Is competition distance a factor in sales for stores/storetypes?
-#Is there a storetype that seems to have higher sales on average?
 
 import pandas as pd
 #Set option so it shows all rows and columns despite the size
@@ -23,13 +22,15 @@ dfM[['Sales', 'CompetitionDistance']].describe()
 #Group dataset by the Store
 dfS = dfM.groupby('Store')
 #Get basic statistics for Sales and CompetitionDistance
-dfS[['Sales', 'CompetitionDistance']].describe()
+dfS['Sales'].describe().head(100)
 #Get the average Sales and CompetitionDistance of each store
 dfSC = dfS.agg({'Sales':'mean', 'CompetitionDistance':'mean'})
 #Sort the aggregated columns by Sales from highest to lowest
 dfSC_sorted=dfSC.sort_values('Sales', ascending=False)
 #Check top 300 stores in sales and see if Competition Distance seems to be a factor
 dfSC_sorted.head(300)
+#Check correlation with correlation function
+dfSC_sorted.corr()
 
 
 #Group original dataset by the Store Type (either a,b,c or d)
@@ -40,3 +41,13 @@ dfT[['Sales', 'CompetitionDistance']].describe()
 dfTC = dfT.agg({'Sales':'mean', 'CompetitionDistance':'mean'})
 #Check data to see if Competition Distance seems to be a factor
 print(dfTC)
+#Create list of store types to check intuition
+stypes = ['a','b','c','d']
+#Iterate through types and see if correlation between Sales and Competition Distance
+for type in stypes:
+    #Create temporary dataframe from original merged dataframe for just iterated store type
+    tempdf = dfM[dfM['StoreType']==type]
+    #reduce to just Sales and Competition Distance columns
+    tempdf = tempdf[['Sales','CompetitionDistance']]
+    #print correlation to confirm/deny intuition
+    print(tempdf.corr())
