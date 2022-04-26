@@ -24,4 +24,4 @@ dfMS.tail(10)
 
 
 #Difference between highest and lowest sales
-print('$'+f'{dfMS.iloc[0,0]-dfMS.iloc[-1,0]:,}')
+print(f'${dfMS.iloc[0,0]-dfMS.iloc[-1,0]:,}')
