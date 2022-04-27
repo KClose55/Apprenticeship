@@ -1,0 +1,56 @@
+SCHEMA: CO.
+
+QUESTIONS:
+========================================================================================
+1. ***what 5 products have the highest unit price?
+
+SELECT * 
+FROM (
+SELECT PRODUCT_ID, PRODUCT_NAME, UNIT_PRICE 
+FROM CO.PRODUCTS 
+ORDER BY UNIT_PRICE DESC
+) 
+WHERE ROWNUM <= 5;
+========================================================================================
+2. ***which are the top 5 stores (discluding online) with highest sales?
+
+SELECT * 
+FROM (
+SELECT TOTAL, STORE_NAME, TOTAL_SALES 
+FROM CO.STORE_ORDERS 
+WHERE TOTAL = 'STORE TOTAL' AND STORE_NAME <> 'Online' 
+ORDER BY TOTAL_SALES DESC
+) 
+WHERE ROWNUM <= 5;
+========================================================================================
+3. ***excluding online what months have the highest sales seen by stores?
+
+SELECT * 
+FROM ( 
+SELECT CO.STORES.STORE_NAME AS STORE_NAME,
+TO_CHAR(CO.ORDERS.ORDER_DATETIME, 'MON') AS SALES_MONTH,
+COUNT(TO_CHAR(CO.ORDERS.ORDER_DATETIME, 'MON')) AS SALES_NUMBER
+FROM CO.ORDERS
+INNER JOIN CO.STORES
+ON CO.ORDERS.STORE_ID = CO.STORES.STORE_ID
+GROUP BY STORE_NAME, TO_CHAR(CO.ORDERS.ORDER_DATETIME, 'MON')
+ORDER BY STORE_NAME, SALES_NUMBER DESC
+) 
+WHERE STORE_NAME <> 'Online';
+========================================================================================
+4. ***is there a correlation between product sales and/or units sold and the avg product review?
+
+SELECT * 
+FROM (
+SELECT CO.PRODUCT_ORDERS.PRODUCT_NAME, 
+AVG(CO.PRODUCT_REVIEWS.AVG_rating) AS AVG_RATING, 
+TRUNC(SUM(CO.PRODUCT_ORDERS.TOTAL_SALES)/AVG(CO.PRODUCTS.UNIT_PRICE),0) AS EST_TOTAL_UNITS,
+SUM(CO.PRODUCT_ORDERS.TOTAL_SALES) AS TOTAL_SALES, 
+AVG(CO.PRODUCTS.UNIT_PRICE) AS UNIT_PRICE
+FROM CO.PRODUCT_ORDERS 
+INNER JOIN CO.PRODUCT_REVIEWS ON CO.PRODUCT_ORDERS.PRODUCT_NAME = CO.PRODUCT_REVIEWS.PRODUCT_NAME
+INNER JOIN CO.PRODUCTS ON CO.PRODUCT_REVIEWS.PRODUCT_NAME = CO.PRODUCTS.PRODUCT_NAME 
+GROUP BY CO.PRODUCT_ORDERS.PRODUCT_NAME 
+ORDER BY EST_TOTAL_UNITS DESC
+) 
+WHERE AVG_RATING IS NOT NULL;
